@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="w.jpg" type="image/x-icon">
+    <title>PDF Viewer VilL ni bos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px 0;
+            background: #6c5ce7;
+            color: white;
+            margin: 0;
+        }
+
+        #upload-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border: 2px dashed #6c5ce7;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input[type="file"]:hover {
+            background: #e8e8ff;
+        }
+
+        #pdf-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            padding: 20px;
+        }
+
+        canvas {
+            border: 1px solid #6c5ce7;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 10px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.min.js"></script>
+</head>
+<body>
+    <h1>PDF Viewer VilL ni boss</h1>
+    <div id="upload-container">
+        <input type="file" id="upload" />
+    </div>
+    <div id="pdf-container">
+        <canvas id="pdf-render"></canvas>
+    </div>
+
+    <script>
+        const upload = document.getElementById("upload");
+        const canvas = document.getElementById("pdf-render");
+        const ctx = canvas.getContext("2d");
+
+        upload.addEventListener("change", async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const typedArray = new Uint8Array(e.target.result);
+                const pdf = await pdfjsLib.getDocument(typedArray).promise;
+
+                // Render halaman pertama
+                const page = await pdf.getPage(1);
+                const viewport = page.getViewport({ scale: 1 });
+
+                // Sesuaikan ukuran canvas dengan ukuran halaman PDF
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                // Render halaman PDF ke canvas
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport,
+                };
+                await page.render(renderContext).promise;
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
